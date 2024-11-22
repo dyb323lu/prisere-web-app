@@ -13,6 +13,7 @@ import Dashboard from './nav_tabs/Dashboard';
 import ClaimsPage from './nav_tabs/Claims';
 import SuppliersPage from './nav_tabs/Suppliers';
 import DisastersPage from './nav_tabs/Disasters';
+import ProfilePage from './nav_tabs/Profile';
 
 const Layout = () => {
   const [isCollapsed, setIsCollapsed] = useState(false);
@@ -106,12 +107,7 @@ const App = () => {
           } />
           <Route path="/suppliers" element={< SuppliersPage />} />
           <Route path="/disasters" element={< DisastersPage />} />
-          <Route path="/profile" element={
-            <div className="bg-white rounded-lg shadow-sm p-6">
-              <h1 className="text-2xl font-semibold text-[#a02350] mb-4">Profile</h1>
-              <p className="text-gray-600">System settings and configurations</p>
-            </div>
-          } />
+          <Route path="/profile" element={< ProfilePage/>} />
         </Route>
       </Routes>
     </Router>
