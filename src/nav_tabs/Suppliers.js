@@ -1,23 +1,91 @@
-import React, { useState } from 'react';
-import { Plus, X, MoreVertical, Phone, Mail, MapPin, Building2, CreditCard, ClipboardList } from 'lucide-react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { Plus, X, MoreVertical, Phone, Mail, MapPin, Building2, CreditCard, ClipboardList, AlertTriangle } from 'lucide-react';
+
+const FEMA_API_URL = 'https://www.fema.gov/api/open/v2/DisasterDeclarationsSummaries';
+const POLLING_INTERVAL = 1800000; // 30 minutes
+const STORAGE_KEY = 'supplierManagementData';
+
+const fetchDisasterData = async () => {
+  try {
+    const response = await fetch(`${FEMA_API_URL}?$filter=incidentEndDate eq null`);
+    const data = await response.json();
+    return data.DisasterDeclarationsSummaries || [];
+  } catch (error) {
+    console.error('Error fetching disaster data:', error);
+    return [];
+  }
+};
+
+const saveToLocalStorage = (data) => {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  } catch (error) {
+    console.error('Error saving to localStorage:', error);
+  }
+};
+
+const loadFromLocalStorage = () => {
+  try {
+    const data = localStorage.getItem(STORAGE_KEY);
+    return data ? JSON.parse(data) : [];
+  } catch (error) {
+    console.error('Error loading from localStorage:', error);
+    return [];
+  }
+};
 
 const SupplierManagement = () => {
+  const [disasterAreas, setDisasterAreas] = useState(new Map());
+  const [lastChecked, setLastChecked] = useState(null);
+
   const [isOpen, setIsOpen] = useState(false);
-  const [suppliers, setSuppliers] = useState([]);
+  const [suppliers, setSuppliers] = useState(() => loadFromLocalStorage());
   const [activeDropdown, setActiveDropdown] = useState(null);
   const [formData, setFormData] = useState({
-    companyName: '',
-    contactName: '',
-    email: '',
-    phone: '',
-    address: '',
-    city: '',
-    state: '',
-    zipCode: '',
+    companyName: 'Example Company',
+    contactName: 'big guys',
+    email: 'example@email.com',
+    phone: '101',
+    address: 'Baker Street',
+    county: 'Orange',
+    state: 'NY',
+    zipCode: '10001',
     taxId: '',
     paymentTerms: '',
     notes: ''
   });
+
+  useEffect(() => {
+    saveToLocalStorage(suppliers);
+  }, [suppliers]);
+  
+  const checkSupplierDisasterStatus = useCallback(async () => {
+    const disasters = await fetchDisasterData();
+    const newDisasterAreas = new Map();
+
+    suppliers.forEach(supplier => {
+      const isAffected = disasters.some(disaster => 
+        disaster.state === supplier.state && 
+        (disaster.designatedArea === `${supplier.county}` || 
+         disaster.designatedArea === 'Statewide')
+      );
+      
+      if (isAffected) {
+        newDisasterAreas.set(supplier.id, true);
+      }
+    });
+
+    setDisasterAreas(newDisasterAreas);
+    setLastChecked(new Date());
+  }, [suppliers]);
+
+  // Add this effect
+  useEffect(() => {
+    checkSupplierDisasterStatus();
+    const interval = setInterval(checkSupplierDisasterStatus, POLLING_INTERVAL);
+    
+    return () => clearInterval(interval);
+  }, [checkSupplierDisasterStatus]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -33,7 +101,9 @@ const SupplierManagement = () => {
       id: Date.now(),
       ...formData
     };
-    setSuppliers(prev => [...prev, newSupplier]);
+    const updatedSuppliers = [...suppliers, newSupplier];
+    setSuppliers(updatedSuppliers);
+    saveToLocalStorage(updatedSuppliers); // Explicit save
     setIsOpen(false);
     setFormData({
       companyName: '',
@@ -41,7 +111,7 @@ const SupplierManagement = () => {
       email: '',
       phone: '',
       address: '',
-      city: '',
+      county: '',
       state: '',
       zipCode: '',
       taxId: '',
@@ -51,7 +121,9 @@ const SupplierManagement = () => {
   };
 
   const handleDeleteSupplier = (supplierId) => {
-    setSuppliers(prev => prev.filter(supplier => supplier.id !== supplierId));
+    const updatedSuppliers = suppliers.filter(supplier => supplier.id !== supplierId);
+    setSuppliers(updatedSuppliers);
+    saveToLocalStorage(updatedSuppliers); // Explicit save
     setActiveDropdown(null);
   };
 
@@ -93,8 +165,11 @@ const SupplierManagement = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {suppliers.map((supplier) => (
               <div
-                key={supplier.id}
-                className="bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow duration-300 overflow-hidden border border-gray-100"
+              key={supplier.id}
+              className={`bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow duration-300 overflow-hidden border 
+                ${disasterAreas.has(supplier.id) 
+                  ? 'border-red-200 bg-red-50' 
+                  : 'border-gray-100'}`}
               >
                 {/* Card Header */}
                 <div className="p-6 pb-4">
@@ -105,6 +180,12 @@ const SupplierManagement = () => {
                         <h3 className="text-lg font-semibold text-gray-900 truncate">
                           {supplier.companyName}
                         </h3>
+                        {disasterAreas.has(supplier.id) && (
+                          <div className="flex items-center gap-2 mt-2">
+                            <AlertTriangle className="h-4 w-4 text-red-600" />
+                            <span className="text-sm text-red-600">Located in disaster area</span>
+                          </div>
+                        )}
                       </div>
                       <p className="text-sm text-gray-600 mt-1">{supplier.contactName}</p>
                     </div>
@@ -147,7 +228,7 @@ const SupplierManagement = () => {
                     </div>
                     <div className="flex items-center text-sm text-gray-600 hover:text-gray-900 transition-colors">
                       <MapPin className="h-4 w-4 mr-3 text-gray-400" />
-                      <span className="truncate">{`${supplier.city}, ${supplier.state} ${supplier.zipCode}`}</span>
+                      <span className="truncate">{`${supplier.county}, ${supplier.state} ${supplier.zipCode}`}</span>
                     </div>
                   </div>
                 </div>
@@ -170,6 +251,11 @@ const SupplierManagement = () => {
                       </div>
                     </div>
                   </div>
+                  {lastChecked && (
+                    <div className="text-xs text-gray-400 mt-2 text-right">
+                      Last checked: {lastChecked.toLocaleString()}
+                    </div>
+                  )}
                 </div>
               </div>
             ))}
@@ -291,12 +377,12 @@ const SupplierManagement = () => {
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
-                        City
+                        County
                       </label>
                       <input
                         type="text"
-                        name="city"
-                        value={formData.city}
+                        name="county"
+                        value={formData.county}
                         onChange={handleInputChange}
                         required
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
