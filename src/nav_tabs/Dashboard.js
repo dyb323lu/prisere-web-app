@@ -2,14 +2,14 @@ import React, {useState} from 'react';
 import { ChevronLeft, ChevronRight, Bell, Settings, Search, Home, FileText, DollarSign, Users, MoreHorizontal } from 'lucide-react';
 import { BrowserRouter as Router, Routes, Route, Link, useLocation } from 'react-router-dom';
 
-import About from './About';
-import Overview from './Overview';
-import SignUpPage from './Signup';
-import SignInPage from './Signin';
-import logo from './assets/Prisere-logo-transparent.png';
-import Alerts from './components/alerts';
+import About from '../About';
+import Overview from '../Overview';
+import SignUpPage from '../Signup';
+import SignInPage from '../Signin';
+import logo from '../assets/Prisere-logo-transparent.png';
+import Alerts from '../components/alerts';
 import NotificationsPage from './Notifications';
-import DocumentTab from './Documents';
+import DocumentTab from '../Documents';
 
 const Dashboard = () => {
   const location = useLocation();
@@ -132,21 +132,21 @@ const Dashboard = () => {
   );
 };
 
-const App = () => {
-  return (
-    <Router>
-      <Routes>
-      {/* <Route path="/" element={<SignUpPage />} /> */}
-      <Route path="/signup" element={<SignUpPage />} />
-      <Route path="/notifications" element={<NotificationsPage />} />
-      <Route path="/signin" element={<SignInPage />} />
-      <Route path="/" element={<Dashboard />}>
-        <Route path="overview" element={<Overview />} />
-        <Route path="about" element={<About />} />
-      </Route>
-      </Routes>
-    </Router>
-  );
-};
+// const App = () => {
+//   return (
+//     <Router>
+//       <Routes>
+//       {/* <Route path="/" element={<SignUpPage />} /> */}
+//       <Route path="/signup" element={<SignUpPage />} />
+//       <Route path="/notifications" element={<NotificationsPage />} />
+//       <Route path="/signin" element={<SignInPage />} />
+//       <Route path="/" element={<Dashboard />}>
+//         <Route path="overview" element={<Overview />} />
+//         <Route path="about" element={<About />} />
+//       </Route>
+//       </Routes>
+//     </Router>
+//   );
+// };
 
 export default Dashboard;

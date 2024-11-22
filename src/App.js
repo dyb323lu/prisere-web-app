@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ChevronLeft, ChevronRight, Bell, Settings, Search, Home, FileText, DollarSign, Users, MoreHorizontal } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Bell, Settings, Search, Home, FileText, DollarSign, Users, MoreHorizontal, MessageSquareWarningIcon, PersonStanding } from 'lucide-react';
 import { BrowserRouter as Router, Routes, Route, Link, useLocation, Outlet } from 'react-router-dom';
 
 import About from './About';
@@ -8,8 +8,11 @@ import SignUpPage from './Signup';
 import SignInPage from './Signin';
 import logo from './assets/Prisere-logo-transparent.png';
 import Alerts from './components/alerts';
-import NotificationsPage from './Notifications';
-import Dashboard from './Dashboard';
+import NotificationsPage from './nav_tabs/Notifications';
+import Dashboard from './nav_tabs/Dashboard';
+import ClaimsPage from './nav_tabs/Claims';
+import SuppliersPage from './nav_tabs/Suppliers';
+import DisastersPage from './nav_tabs/Disasters';
 
 const Layout = () => {
   const [isCollapsed, setIsCollapsed] = useState(false);
@@ -50,8 +53,9 @@ const Layout = () => {
               { to: "/claims", icon: <FileText size={20} />, label: "Claims" },
               { to: "/accounting", icon: <DollarSign size={20} />, label: "Accounting" },
               { to: "/suppliers", icon: <Users size={20} />, label: "Suppliers" },
+              { to: "/disasters", icon: <MessageSquareWarningIcon size={20} />, label: "Disasters" },
               { to: "/notifications", icon: <Bell size={20} />, label: "Notifications" },
-              { to: "/settings", icon: <Settings size={20} />, label: "Settings" }
+              { to: "/profile", icon: <PersonStanding size={20} />, label: "Profile" }
             ].map((item) => (
               <li key={item.to}>
                 <Link
@@ -93,27 +97,18 @@ const App = () => {
           <Route path="/" element={<Dashboard />} />
           <Route path="/notifications" element={<NotificationsPage />} />
           <Route path="/about" element={<About />} />
-          <Route path="/claims" element={
-            <div className="bg-white rounded-lg shadow-sm p-6">
-              <h1 className="text-2xl font-semibold text-[#a02350] mb-4">Claims</h1>
-              <p className="text-gray-600">Claims management system</p>
-            </div>
-          } />
+          <Route path="/claims" element={<ClaimsPage />} />
           <Route path="/accounting" element={
             <div className="bg-white rounded-lg shadow-sm p-6">
               <h1 className="text-2xl font-semibold text-[#a02350] mb-4">Accounting</h1>
               <p className="text-gray-600">Financial management system</p>
             </div>
           } />
-          <Route path="/suppliers" element={
+          <Route path="/suppliers" element={< SuppliersPage />} />
+          <Route path="/disasters" element={< DisastersPage />} />
+          <Route path="/profile" element={
             <div className="bg-white rounded-lg shadow-sm p-6">
-              <h1 className="text-2xl font-semibold text-[#a02350] mb-4">Suppliers</h1>
-              <p className="text-gray-600">Supplier management system</p>
-            </div>
-          } />
-          <Route path="/settings" element={
-            <div className="bg-white rounded-lg shadow-sm p-6">
-              <h1 className="text-2xl font-semibold text-[#a02350] mb-4">Settings</h1>
+              <h1 className="text-2xl font-semibold text-[#a02350] mb-4">Profile</h1>
               <p className="text-gray-600">System settings and configurations</p>
             </div>
           } />
