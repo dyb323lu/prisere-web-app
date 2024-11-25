@@ -39,6 +39,14 @@ Instead, it will copy all the configuration files and the transitive dependencie
 
 You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
 
+## Running the backend
+
+Create an .env file in your repository with the environmental variable MONGO_URI. To get the MONGO_URI, accept an invitation from the cluster. When signed in, select the Cluster, click 'Connect', then select 'Drivers' -> 'Node.js 6.7 or later'. There should be a connection string that you can then use in .env.
+
+Once you add that environmental variable you should be able to run the backend.
+
+Run `npm install` from the /backend folder and then `npm run start`.
+
 ## Learn More
 
 You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
