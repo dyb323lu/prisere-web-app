@@ -5,6 +5,7 @@ const mongoose = require('mongoose');
 const cookieParser = require('cookie-parser');
 
 const UserRoutes = require('./routes/UserRoutes.js');
+const QuickbooksRoutes = require('./routes/QuickbooksRoutes');
 const app = express();
 
 // Middleware, enable cors
@@ -23,6 +24,7 @@ mongoose.connect(process.env.MONGO_URI)
 
 // Routes
 app.use('/users', UserRoutes);
+app.use('/quickbooks', QuickbooksRoutes);
 
 // Sample API endpoint
 app.get('/', (req, res) => {
