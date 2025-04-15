@@ -11,8 +11,11 @@ import Alerts from './components/alerts';
 import NotificationsPage from './nav_tabs/Notifications';
 import Dashboard from './nav_tabs/Dashboard';
 import ClaimsPage from './nav_tabs/Claims';
+import AccountingPage from './nav_tabs/Accounting';
 import SuppliersPage from './nav_tabs/Suppliers';
 import DisastersPage from './nav_tabs/Disasters';
+import ResourcesPage from './nav_tabs/Resources';
+
 import ProfilePage from './nav_tabs/Profile';
 
 const Layout = () => {
@@ -56,7 +59,8 @@ const Layout = () => {
               { to: "/suppliers", icon: <Users size={20} />, label: "Suppliers" },
               { to: "/disasters", icon: <MessageSquareWarningIcon size={20} />, label: "Disasters" },
               { to: "/notifications", icon: <Bell size={20} />, label: "Notifications" },
-              { to: "/profile", icon: <PersonStanding size={20} />, label: "Profile" }
+              { to: "/profile", icon: <PersonStanding size={20} />, label: "Profile" },
+              { to: "/resources", icon: <MoreHorizontal size={20} />, label: "Resources" },
             ].map((item) => (
               <li key={item.to}>
                 <Link
@@ -99,15 +103,11 @@ const App = () => {
           <Route path="/notifications" element={<NotificationsPage />} />
           <Route path="/about" element={<About />} />
           <Route path="/claims" element={<ClaimsPage />} />
-          <Route path="/accounting" element={
-            <div className="bg-white rounded-lg shadow-sm p-6">
-              <h1 className="text-2xl font-semibold text-[#a02350] mb-4">Accounting</h1>
-              <p className="text-gray-600">Financial management system</p>
-            </div>
-          } />
+          <Route path="/accounting" element={<AccountingPage />} />
           <Route path="/suppliers" element={< SuppliersPage />} />
           <Route path="/disasters" element={< DisastersPage />} />
           <Route path="/profile" element={< ProfilePage/>} />
+          <Route path="/resources" element={<ResourcesPage />} /> {/* <-- new route */}
         </Route>
       </Routes>
     </Router>

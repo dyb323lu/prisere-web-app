@@ -24,7 +24,7 @@ mongoose.connect(process.env.MONGO_URI)
 
 // Routes
 app.use('/users', UserRoutes);
-app.use('/quickbooks', QuickbooksRoutes);
+app.use('/api/quickbooks', QuickbooksRoutes);
 
 // Sample API endpoint
 app.get('/', (req, res) => {

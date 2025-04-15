@@ -21,15 +21,26 @@ router.get('/auth', (req, res) => {
         scope: [OAuthClient.scopes.Accounting, OAuthClient.scopes.OpenId],
         state: 'testState',
     });
+    console.log('Redirect URI:', authUri);  // Log the authorization URL
 
     res.redirect(authUri);
 });
 
 // Callback route to handle OAuth response
 router.get('/callback', async (req, res) => {
+    console.log('Callback URL:', req.url); // This will log the full URL, including the query parameters
+    const { code, state } = req.query;  // Ensure you're receiving the code and state
+
+    if (!code) {
+        return res.status(400).send('Authorization code missing.');
+    }
+    if (state !== 'testState') {
+        return res.status(400).send('Invalid state parameter.');
+    }
+
     try {
-        // Create the token using the authorization code
-        const authResponse = await oauthClient.createToken(req.url);
+        // Exchange the authorization code for an access token
+        const authResponse = await oauthClient.createToken(req.url);  // Pass the full URL to createToken
         accessToken = authResponse.getJson().access_token;
         res.send('QuickBooks authentication successful!');
     } catch (error) {

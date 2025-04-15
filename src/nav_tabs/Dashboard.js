@@ -26,6 +26,10 @@ const Dashboard = () => {
     return location.pathname === path;
   };
 
+  // Handle QuickBooks login redirection
+  const handleQuickbooksLogin = () => {
+    window.location.href = 'http://localhost:8000/api/quickbooks/auth'; // Opens QuickBooks login in a new tab
+  };
   const renderContent = () => {
     switch (activeTab) {
       case 'overview':
@@ -57,6 +61,14 @@ const Dashboard = () => {
             
             <button className="p-2 bg-gray-200 rounded-full"><Settings /></button>
             <div className="w-10 h-10 bg-gray-300 rounded-full"></div>
+
+            {/* QuickBooks Login Button */}
+            <button
+              onClick={handleQuickbooksLogin}
+              className="p-2 bg-blue-500 text-white rounded-full"
+            >
+              Connect QuickBooks
+            </button>
           </div>
         </header>
 
