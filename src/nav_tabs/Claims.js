@@ -92,6 +92,7 @@ const ClaimsDashboard = () => {
   const handleDeleteClaim = (id) => {
     setClaims(claims.filter(claim => claim.id !== id));
     setShowDeleteModal(false);
+    setSelectedClaim(null);
   };
 
   // Handle updating a claim
@@ -100,6 +101,19 @@ const ClaimsDashboard = () => {
       claim.id === updatedClaim.id ? updatedClaim : claim
     ));
     setShowEditModal(false);
+  };
+
+  // Handle adding a new claim
+  const handleAddClaim = (newClaim) => {
+    // Generate a new ID (in a real app, this would come from your backend)
+    const newId = Math.max(...claims.map(c => c.id), 0) + 1;
+    const claimWithId = {
+      ...newClaim,
+      id: newId,
+      claimNumber: `CLM-${new Date().getFullYear()}-${String(newId).padStart(3, '0')}`
+    };
+    setClaims([...claims, claimWithId]);
+    setShowNewClaimModal(false);
   };
 
   return (
@@ -263,8 +277,8 @@ const ClaimsDashboard = () => {
                                 </button>
                                 <button
                                   onClick={() => {
+                                    setSelectedClaim(claim);
                                     setShowDeleteModal(true);
-                                    setSelectedClaim(null);
                                   }}
                                   className="flex items-center px-4 py-2 text-sm text-red-600 hover:bg-gray-100 w-full text-left"
                                 >
@@ -304,23 +318,29 @@ const ClaimsDashboard = () => {
       </div>
 
       {/* Delete Confirmation Modal */}
-      {showDeleteModal && (
+      {showDeleteModal && selectedClaim && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg shadow-xl w-full max-w-md">
             <div className="flex justify-between items-center border-b px-6 py-4">
               <h3 className="text-lg font-semibold">Delete Claim</h3>
               <button 
-                onClick={() => setShowDeleteModal(false)}
+                onClick={() => {
+                  setShowDeleteModal(false);
+                  setSelectedClaim(null);
+                }}
                 className="text-gray-400 hover:text-gray-500"
               >
                 <X className="h-6 w-6" />
               </button>
             </div>
             <div className="p-6">
-              <p className="text-gray-700 mb-6">Are you sure you want to delete this claim?</p>
+              <p className="text-gray-700 mb-6">Are you sure you want to delete claim {selectedClaim.claimNumber}?</p>
               <div className="flex justify-end space-x-3">
                 <button
-                  onClick={() => setShowDeleteModal(false)}
+                  onClick={() => {
+                    setShowDeleteModal(false);
+                    setSelectedClaim(null);
+                  }}
                   className="px-4 py-2 border rounded-lg hover:bg-gray-50"
                 >
                   Cancel
@@ -338,11 +358,19 @@ const ClaimsDashboard = () => {
       )}
 
       {/* Edit Claim Modal */}
-      {showEditModal && (
+      {showEditModal && selectedClaim && (
         <EditClaimModal
           claim={selectedClaim}
           onClose={() => setShowEditModal(false)}
           onUpdate={handleUpdateClaim}
+        />
+      )}
+
+      {/* New Claim Modal */}
+      {showNewClaimModal && (
+        <NewClaimModal
+          onClose={() => setShowNewClaimModal(false)}
+          onSubmit={handleAddClaim}
         />
       )}
     </div>
@@ -402,6 +430,39 @@ const EditClaimModal = ({ claim, onClose, onUpdate }) => {
             />
           </div>
           <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-700 mb-1">Type</label>
+            <input
+              type="text"
+              name="type"
+              value={editedClaim.type}
+              onChange={handleChange}
+              className="w-full p-2 border rounded"
+              required
+            />
+          </div>
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-700 mb-1">Amount</label>
+            <input
+              type="text"
+              name="amount"
+              value={editedClaim.amount}
+              onChange={handleChange}
+              className="w-full p-2 border rounded"
+              required
+            />
+          </div>
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-700 mb-1">Date</label>
+            <input
+              type="date"
+              name="date"
+              value={editedClaim.date}
+              onChange={handleChange}
+              className="w-full p-2 border rounded"
+              required
+            />
+          </div>
+          <div className="mb-4">
             <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
             <select
               name="status"
@@ -442,6 +503,136 @@ const EditClaimModal = ({ claim, onClose, onUpdate }) => {
               className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
             >
               Save Changes
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+};
+
+// New Claim Modal Component
+const NewClaimModal = ({ onClose, onSubmit }) => {
+  const [newClaim, setNewClaim] = useState({
+    claimant: '',
+    type: '',
+    status: 'Pending Review',
+    amount: '',
+    date: new Date().toISOString().split('T')[0], // Default to today's date
+    priority: 'Medium'
+  });
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setNewClaim(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    onSubmit(newClaim);
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-white rounded-lg shadow-xl w-full max-w-md">
+        <div className="flex justify-between items-center border-b px-6 py-4">
+          <h3 className="text-lg font-semibold">Create New Claim</h3>
+          <button 
+            onClick={onClose}
+            className="text-gray-400 hover:text-gray-500"
+          >
+            <X className="h-6 w-6" />
+          </button>
+        </div>
+        <form onSubmit={handleSubmit} className="p-6">
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-700 mb-1">Claimant Name</label>
+            <input
+              type="text"
+              name="claimant"
+              value={newClaim.claimant}
+              onChange={handleChange}
+              className="w-full p-2 border rounded"
+              required
+            />
+          </div>
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-700 mb-1">Type</label>
+            <input
+              type="text"
+              name="type"
+              value={newClaim.type}
+              onChange={handleChange}
+              className="w-full p-2 border rounded"
+              required
+            />
+          </div>
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-700 mb-1">Amount</label>
+            <input
+              type="text"
+              name="amount"
+              value={newClaim.amount}
+              onChange={handleChange}
+              className="w-full p-2 border rounded"
+              required
+            />
+          </div>
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-700 mb-1">Date</label>
+            <input
+              type="date"
+              name="date"
+              value={newClaim.date}
+              onChange={handleChange}
+              className="w-full p-2 border rounded"
+              required
+            />
+          </div>
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
+            <select
+              name="status"
+              value={newClaim.status}
+              onChange={handleChange}
+              className="w-full p-2 border rounded"
+              required
+            >
+              <option value="Pending Review">Pending Review</option>
+              <option value="In Progress">In Progress</option>
+              <option value="Completed">Completed</option>
+            </select>
+          </div>
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-700 mb-1">Priority</label>
+            <select
+              name="priority"
+              value={newClaim.priority}
+              onChange={handleChange}
+              className="w-full p-2 border rounded"
+              required
+            >
+              <option value="High">High</option>
+              <option value="Medium">Medium</option>
+              <option value="Low">Low</option>
+            </select>
+          </div>
+          <div className="flex justify-end space-x-3 mt-6">
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-4 py-2 border rounded-lg hover:bg-gray-50"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+            >
+              Create Claim
             </button>
           </div>
         </form>
